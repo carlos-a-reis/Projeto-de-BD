@@ -182,12 +182,14 @@ delimiter ;
 delimiter $$
 	create procedure sp_povoar_banco_de_dados(in qnt_registros int)
     begin
-		call sp_povoar_clientes(qnt_registros);
-        call sp_povoar_categorias(qnt_registros);
-        call sp_povoar_enderecos(qnt_registros);
-        call sp_povoar_pedidos(qnt_registros);
-        call sp_povoar_produtos(qnt_registros);
-        call sp_povoar_itens_pedidos(qnt_registros);
+		start transaction;
+			call sp_povoar_clientes(qnt_registros);
+			call sp_povoar_categorias(qnt_registros);
+			call sp_povoar_enderecos(qnt_registros);
+			call sp_povoar_pedidos(qnt_registros);
+			call sp_povoar_produtos(qnt_registros);
+			call sp_povoar_itens_pedidos(qnt_registros);
+        commit;
 	end$$
 delimiter ;
 
@@ -208,6 +210,6 @@ delimiter $$
 delimiter ;
 
 call sp_truncate_banco_de_dados();
-call sp_povoar_banco_de_dados(10000);
+call sp_povoar_banco_de_dados(1000);
 
 select * from cliente;
