@@ -8,6 +8,7 @@ delimiter $$
         declare v_nome varchar(7) default 'cliente';
         declare v_sobrenome varchar(50);
         declare v_data_nascimento varchar(50);
+        declare cpf_existe int;
         
         while id <= qnt_clientes do
 			set v_cpf = lpad(floor(rand() * 100000000000), 11, '0');
@@ -15,10 +16,15 @@ delimiter $$
             set v_email = concat(v_nome, '.', v_sobrenome, 'email.com');
             set v_data_nascimento = date_add(curdate(), interval -floor(rand() * 365 * 80) day);
             
-			insert into cliente(cpf, email, nome, sobrenome, data_nascimento)
-            values(v_cpf, v_email, v_nome, v_sobrenome, v_data_nascimento);
+            select count(*) into cpf_existe from cliente
+			where cpf = v_cpf;
             
-            set id = id + 1;
+            if cpf_existe = 0 then
+				insert into cliente(cpf, email, nome, sobrenome, data_nascimento)
+				values(v_cpf, v_email, v_nome, v_sobrenome, v_data_nascimento);
+            
+				set id = id + 1;
+			end if;
 		end while;
 	end$$
 delimiter ;
@@ -190,16 +196,18 @@ delimiter ;
 delimiter $$
 	create procedure sp_truncate_banco_de_dados()
     begin
+		set foreign_key_checks = 0;
 		truncate table cliente;
         truncate table categoria;
         truncate table endereco;
         truncate table pedido;
         truncate table produto;
         truncate table itens_pedido;
+        set foreign_key_checks = 1;
 	end$$
 delimiter ;
 
 call sp_truncate_banco_de_dados();
-call sp_povoar_banco_de_dados(1000);
+call sp_povoar_banco_de_dados(10000);
 
 select * from cliente;
